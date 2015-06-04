@@ -31,6 +31,8 @@ hid_data=
 	end
 }
 
+tween=require("tween")
+
 function sleep(sec)
 	socket.select(nil,nil,sec)
 end
@@ -64,6 +66,8 @@ end
 -- logfile:write(count.."={"..str.."}\n")
 -- count=count+1
 
+circle = {x=0,y=0,r=100}
+
 function love.update(dt)
 	_dt=dt
 	FPS=0.96*FPS+0.04*1/dt
@@ -87,10 +91,33 @@ function love.update(dt)
 			hid_data.sumOld=hid_data.sum;
 		end
 	end
+	tab=hid_data.buf
+	if tab[9] then
+		if(bit.band(tab[9],bit.lshift(1,7))>0 and map.offset.switch.r<=0)then	-- right key
+			if tid then
+				tween.stop(tid)
+				tid=nil
+			end
+			tid=tween(0.40, map.offset.switch, {r = 0.03}, "outElastic",function()tid=nil;end)
+		end
+		if(bit.band(tab[9],bit.lshift(1,6))>0 and map.offset.switch.r>=0)then	-- left key
+			if tid then
+				tween.stop(tid)
+				tid=nil
+			end
+			tid=tween(0.40, map.offset.switch, {r = -0.03}, "outElastic",function()tid=nil;end)
+		end
+	end
+	tween.update(dt)
+	circle.x=love.mouse.getX()
+	circle.y=love.mouse.getY()
 	love.timer.sleep(0.01)
 end
 
+
+
 function love.draw(dt)
+	love.graphics.circle("line", circle.x, circle.y, circle.r, 64)
 	debugO1:clr()
 	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
 
@@ -99,6 +126,7 @@ function love.draw(dt)
 	love.graphics.scale(0.4, 0.4)
 	disp.drawBack()
 	disp.drawClockUI(hid_data.buf)
+	disp.drawSwitch(hid_data.buf)
 	love.graphics.pop()
 
 	debugO1:write("FPS:"..m.floor(FPS+0.5))

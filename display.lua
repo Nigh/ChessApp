@@ -71,3 +71,12 @@ function drawBack()
 	love.graphics.setColor(color.R,color.G,color.B,180);
 	love.graphics.draw(bitmap.pBbackground, 1, 1)
 end
+
+function drawSwitch(tab)
+	if tab[9]==nil then
+		return
+	end
+	love.graphics.setColor(color.R,color.G,color.B,255);
+
+	love.graphics.draw(bitmap.pBswitch,map.offset.switch.x, map.offset.switch.y,map.offset.switch.r,1,1,map.offset.switch.ox,map.offset.switch.oy);
+end

@@ -27,8 +27,8 @@ bits[1][2].image=nil
 bits[1][3].image=nil
 bits[1][4].image=nil
 bits[1][5].image=nil
-bits[1][6].image=nil
-bits[1][7].image=nil
+bits[1][6].image=nil	-- left key
+bits[1][7].image=nil	-- right key
 
 bits[2][0].image=bp.pBchess_dot
 bits[2][1].image=bp.pBchess_dot

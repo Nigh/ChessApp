@@ -12,6 +12,7 @@ hmsPath=rootPath.."hms/"
 
 pBbackground=newImage(rootPath.."bgEx.png")
 
+pBswitch=newImage(rootPath.."switch.png")
 pBalm=newImage(rootPath.."alarm.png")
 pBbat=newImage(rootPath.."battery.png")
 pBblack=newImage(rootPath.."black.png")
