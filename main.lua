@@ -10,6 +10,8 @@ usb=require("usbParse")
 disp=require("display")
 cursor=require("cursor")
 
+shaders=require("shaders")
+
 hid=require("hid")
 
 hid.enum( 0x1130, 0x3132 )
@@ -52,6 +54,11 @@ function love.load(arg)
 	cursor1=cursor.new("cursor.png")
 	cursor1:setOffset(20,20)
 	cursorAngel=0
+
+	shaders.switch:send("y",575)
+	shaders.switch:send("height",5)
+	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 end
 
 -- logfile=io.open("log.log", "w")
@@ -117,17 +124,41 @@ end
 
 
 function love.draw(dt)
+	render_buffer:clear()
+	render_buffer2:clear()
 	love.graphics.circle("line", circle.x, circle.y, circle.r, 64)
 	debugO1:clr()
 	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
+	love.graphics.push()
+		love.graphics.translate(70, 200)
+		love.graphics.scale(0.4, 0.4)
+		love.graphics.setShader(shaders.color)
+		disp.drawBack()
+		love.graphics.setShader()
+	love.graphics.pop()
+	love.graphics.setCanvas(render_buffer2)
+
 
 	love.graphics.push()
-	love.graphics.translate(70, 200)
-	love.graphics.scale(0.4, 0.4)
-	disp.drawBack()
-	disp.drawClockUI(hid_data.buf)
-	disp.drawSwitch(hid_data.buf)
+		love.graphics.translate(70, 200)
+		love.graphics.scale(0.4, 0.4)
+		love.graphics.setShader(shaders.switch)
+		disp.drawSwitch(hid_data.buf)
 	love.graphics.pop()
+
+	love.graphics.setCanvas(render_buffer)
+	love.graphics.setShader(shaders.color)
+	love.graphics.draw(render_buffer2)
+
+	love.graphics.push()
+		love.graphics.translate(70, 200)
+		love.graphics.scale(0.4, 0.4)
+		disp.drawClockUI(hid_data.buf)
+		love.graphics.setShader()
+		love.graphics.setCanvas()
+	love.graphics.pop()
+
+	love.graphics.draw(render_buffer)
 
 	debugO1:write("FPS:"..m.floor(FPS+0.5))
 	debugO1:write("USB:"..m.floor(CPS+0.5))
@@ -142,7 +173,6 @@ function love.draw(dt)
 		end
 		debugO1:write(str)
 	end
-
 	debugO1:output()
 
 	cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
@@ -155,6 +185,31 @@ function love.keypressed( key, isrepeat )
 	end
 end
 
+function love.keyreleased(key)
+
+end
+
+function love.mousepressed( x,y,key )
+	if key=="l" then
+		if cid then
+			tween.stop(cid)
+			cid=nil
+		end
+		cid=tween(0.20, circle, {r = 200}, "outBack",function()cid=nil;end)
+	end
+end
+
+function love.mousereleased( x,y,key )
+	if key=="l" then
+		if cid then
+			tween.stop(cid)
+			cid=nil
+		end
+		cid=tween(0.80, circle, {r = 100}, "outElastic",function()cid=nil;end)
+	end
+end
+
 function love.resize(newWidth,newHeight)
+
 end
 

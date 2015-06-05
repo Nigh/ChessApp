@@ -44,19 +44,19 @@ function drawClockUI_All()
 end
 
 
-local hue=0
+local hue=190
 local color=hsb2rgb(hue,0.9,250)
 local statu=0
 function drawClockUI(tab)
 	if tab==nil then
 		return
 	end
-	color=hsb2rgb(hue,0.9,250)
-	hue=hue+0.25
-	if(hue>359)then
-		hue=0
-	end
-	love.graphics.setColor(color.R,color.G,color.B,255);
+	-- color=hsb2rgb(hue,0.9,250)
+	-- hue=hue+0.25
+	-- if(hue>359)then
+	-- 	hue=0
+	-- end
+	-- love.graphics.setColor(color.R,color.G,color.B,255);
 	for j=1,31 do
 		-- debugU.write(bit.band(3,1))
 		for i=0,7 do
@@ -68,7 +68,7 @@ function drawClockUI(tab)
 end
 
 function drawBack()
-	love.graphics.setColor(color.R,color.G,color.B,180);
+	-- love.graphics.setColor(color.R,color.G,color.B,255);
 	love.graphics.draw(bitmap.pBbackground, 1, 1)
 end
 
@@ -76,7 +76,6 @@ function drawSwitch(tab)
 	if tab[9]==nil then
 		return
 	end
-	love.graphics.setColor(color.R,color.G,color.B,255);
-
+	-- love.graphics.setColor(color.R,color.G,color.B,255);
 	love.graphics.draw(bitmap.pBswitch,map.offset.switch.x, map.offset.switch.y,map.offset.switch.r,1,1,map.offset.switch.ox,map.offset.switch.oy);
 end
