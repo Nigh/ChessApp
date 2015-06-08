@@ -12,6 +12,8 @@ cursor=require("cursor")
 
 shaders=require("shaders")
 
+textInfo=require("textInfo")
+
 hid=require("hid")
 
 hid.enum( 0x1130, 0x3132 )
@@ -39,14 +41,19 @@ function sleep(sec)
 	socket.select(nil,nil,sec)
 end
 
+-- (0,0) x=(0,3066) y=(-165,802) w=3066 h=958
+-- 宽度预留10% we=3406
+-- 高度预留30% he=1368
 function love.load(arg)
-	fWeight=12
+	-- gTrans={sx=0.4,sy=0.4,ox=70,oy=200}		-- 基于 1366x768 的 初始转换参数
+	-- screen={w,h=love.window.getDesktopDimensions(1)}
+	gTrans=calc_gTrans()
+
 	FPS=0		-- 帧率
 	CPS=0		-- 每秒通信次数
 	debugO1=debugU.new();
 	debugO1:setFont("consola.ttf",18)
-	love.graphics.setFont(love.graphics.newFont("consola.ttf",fWeight));
-	-- debugU.setFont("consola.ttf",fWeight);
+	textInfo.font=love.graphics.newFont("悦黑特细体.otf",90*gTrans.sx);
 	hid_inv=0	-- 间隔上次hid操作的时间
 	usb_inv=0	-- 间隔上次usb成功通信的时间
 	usbc_inv=0	-- 上次usb成功通信的时间
@@ -55,8 +62,8 @@ function love.load(arg)
 	cursor1:setOffset(20,20)
 	cursorAngel=0
 
-	shaders.switch:send("y",575)
-	shaders.switch:send("height",5)
+	shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
+	shaders.switch:send("height",10*gTrans.sy)
 	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 end
@@ -100,19 +107,38 @@ function love.update(dt)
 	end
 	tab=hid_data.buf
 	if tab[9] then
-		if(bit.band(tab[9],bit.lshift(1,7))>0 and map.offset.switch.r<=0)then	-- right key
+		if(bit.band(tab[9],bit.lshift(1,7))>0 and bit.band(tab[9],bit.lshift(1,6))==0 and map.offset.switch.r~=0.03)then	-- right key
 			if tid then
-				tween.stop(tid)
-				tid=nil
+				if tid.target.r~=0.03 then
+					tween.stop(tid)
+					tid=nil
+					tid=tween(0.40, map.offset.switch, {r = 0.03}, "outElastic")
+				end
+			else
+				tid=tween(0.40, map.offset.switch, {r = 0.03}, "outElastic")
 			end
-			tid=tween(0.40, map.offset.switch, {r = 0.03}, "outElastic",function()tid=nil;end)
 		end
-		if(bit.band(tab[9],bit.lshift(1,6))>0 and map.offset.switch.r>=0)then	-- left key
+		if(bit.band(tab[9],bit.lshift(1,6))>0 and bit.band(tab[9],bit.lshift(1,7))==0 and map.offset.switch.r~=-0.03)then	-- left key
 			if tid then
-				tween.stop(tid)
-				tid=nil
+				if tid.target.r~=-0.03 then
+					tween.stop(tid)
+					tid=nil
+					tid=tween(0.40, map.offset.switch, {r = -0.03}, "outElastic")
+				end
+			else
+				tid=tween(0.40, map.offset.switch, {r = -0.03}, "outElastic")
 			end
-			tid=tween(0.40, map.offset.switch, {r = -0.03}, "outElastic",function()tid=nil;end)
+		end
+		if(bit.band(tab[9],bit.lshift(1,6))==bit.band(tab[9],bit.lshift(1,7)) and map.offset.switch.r~=0)then	-- middle
+			if tid then
+				if tid.target.r~=0 then
+					tween.stop(tid)
+					tid=nil
+					tid=tween(0.50, map.offset.switch, {r = 0}, "outBack")
+				end
+			else
+				tid=tween(0.50, map.offset.switch, {r = 0}, "outBack")
+			end
 		end
 	end
 	tween.update(dt)
@@ -130,8 +156,8 @@ function love.draw(dt)
 	debugO1:clr()
 	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
 	love.graphics.push()
-		love.graphics.translate(70, 200)
-		love.graphics.scale(0.4, 0.4)
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
 		love.graphics.setShader(shaders.color)
 		disp.drawBack()
 		love.graphics.setShader()
@@ -140,8 +166,8 @@ function love.draw(dt)
 
 
 	love.graphics.push()
-		love.graphics.translate(70, 200)
-		love.graphics.scale(0.4, 0.4)
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
 		love.graphics.setShader(shaders.switch)
 		disp.drawSwitch(hid_data.buf)
 	love.graphics.pop()
@@ -151,14 +177,17 @@ function love.draw(dt)
 	love.graphics.draw(render_buffer2)
 
 	love.graphics.push()
-		love.graphics.translate(70, 200)
-		love.graphics.scale(0.4, 0.4)
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
 		disp.drawClockUI(hid_data.buf)
 		love.graphics.setShader()
 		love.graphics.setCanvas()
 	love.graphics.pop()
 
 	love.graphics.draw(render_buffer)
+
+	textInfo.showRule(hid_data.buf[40])
+	textInfo.showName()
 
 	debugO1:write("FPS:"..m.floor(FPS+0.5))
 	debugO1:write("USB:"..m.floor(CPS+0.5))
@@ -173,7 +202,7 @@ function love.draw(dt)
 		end
 		debugO1:write(str)
 	end
-	debugO1:output()
+	-- debugO1:output()
 
 	cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
 	cursor1:draw(cursorAngel)
@@ -213,3 +242,21 @@ function love.resize(newWidth,newHeight)
 
 end
 
+-- (0,0) x=(0,3066) y=(-165,802) w=3066 h=958
+-- 宽度预留10% we=3406
+-- 高度预留30% he=1368
+function calc_gTrans()
+	local w,h=love.window.getDimensions()
+	tab={sx=0.4,sy=0.4,ox=70,oy=200}		-- 基于 1366x768 的 初始转换参数
+	if w/h > 2.49 then	-- 高度优先
+		tab.sx=h/1368
+		tab.sy=tab.sx
+		tab.ox=175*tab.sx+(w-tab.sx*3406)/2
+	else	-- 宽度优先
+		tab.sx=w/3406
+		tab.sy=tab.sx
+		tab.ox=175*tab.sx
+	end
+	tab.oy=h*0.25
+	return tab
+end
