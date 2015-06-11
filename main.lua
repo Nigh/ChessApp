@@ -16,6 +16,8 @@ textInfo=require("textInfo")
 
 hid=require("hid")
 
+rainDrop=require("raindrop")
+
 hid.enum( 0x1130, 0x3132 )
 hid.open( 0x1130, 0x3132 )
 hid.set_wbuf( { 0x00, 0x55, 0x53, 0x42, 0x43, 0xff, 0xff, 0xff, 0xf2 }, 9 )
@@ -101,7 +103,7 @@ end
 -- logfile:write(count.."={"..str.."}\n")
 -- count=count+1
 
-circle = {x=0,y=0,r=100}
+circle = {x=0,y=0,r=100,alpha=0}
 
 function love.update(dt)
 	_dt=dt
@@ -163,17 +165,16 @@ function love.update(dt)
 		end
 	end
 	tween.update(dt)
-	circle.x=love.mouse.getX()
-	circle.y=love.mouse.getY()
+	rainDrop.update(dt)
 	love.timer.sleep(0.01)
 end
 
 
 
 function love.draw(dt)
+	love.graphics.setColor(255,255,255,255)
 	render_buffer:clear()
 	render_buffer2:clear()
-	love.graphics.circle("line", circle.x, circle.y, circle.r, 64)
 	debugO1:clr()
 	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
 	love.graphics.push()
@@ -227,6 +228,9 @@ function love.draw(dt)
 
 	cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
 	cursor1:draw(cursorAngel)
+	love.graphics.setColor(255,255,255,circle.alpha)
+	love.graphics.circle("line", circle.x, circle.y, circle.r, 64)
+	rainDrop.draw()
 end
 
 function love.keypressed( key, isrepeat )
@@ -244,21 +248,12 @@ end
 
 function love.mousepressed( x,y,key )
 	if key=="l" then
-		if cid then
-			tween.stop(cid)
-			cid=nil
-		end
-		cid=tween(0.20, circle, {r = 200}, "outBack",function()cid=nil;end)
+		rainDrop.newDrop(love.mouse.getX(),love.mouse.getY(),math.random(180,300))
 	end
 end
 
 function love.mousereleased( x,y,key )
 	if key=="l" then
-		if cid then
-			tween.stop(cid)
-			cid=nil
-		end
-		cid=tween(0.80, circle, {r = 100}, "outElastic",function()cid=nil;end)
 	end
 end
 
