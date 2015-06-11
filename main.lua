@@ -45,6 +45,27 @@ end
 -- 宽度预留10% we=3406
 -- 高度预留30% he=1368
 function love.load(arg)
+	-- [[temp.t]]
+	textD={}
+	file={}
+	for i=1,3 do
+		file[i]=io.open("temp"..i..".t","r")
+		if(file[i]==nil)then
+			textD[i] = nil
+		else
+			textD[i] = file[i]:read()
+			file[i]:close()
+		end
+		if(textD[i] == nil)then
+			textD[i] = ""
+		end
+	end
+	textInfo.player[1].text = textD[1]
+	textInfo.player[2].text = textD[2]
+	textInfo.exRuleTxt = textD[3]
+
+	-- [[temp.t]]
+
 	-- gTrans={sx=0.4,sy=0.4,ox=70,oy=200}		-- 基于 1366x768 的 初始转换参数
 	-- screen={w,h=love.window.getDesktopDimensions(1)}
 	gTrans=calc_gTrans()
@@ -209,8 +230,11 @@ function love.draw(dt)
 end
 
 function love.keypressed( key, isrepeat )
-	if key=="escape" then
+	if key == "escape" then
 		love.event.quit()
+	end
+	if key == "f8" then
+		os.execute("sendManager.exe")
 	end
 end
 
@@ -259,4 +283,32 @@ function calc_gTrans()
 	end
 	tab.oy=h*0.25
 	return tab
+end
+
+buf={}
+function love.textinput(t)
+	table.insert(buf,t)
+	if(#buf>=7)then
+		if(buf.valid==true or string.find(table.concat(buf), "6173420",1,true))then
+			buf.valid = true
+			for i=1,3 do
+				file[i]=io.open("temp"..i..".t","r")
+				if(file[i]==nil)then
+					textD[i] = nil
+				else
+					textD[i] = file[i]:read()
+					file[i]:close()
+				end
+				if(textD[i] == nil)then
+					textD[i] = ""
+				end
+			end
+			textInfo.player[1].text = textD[1]
+			textInfo.player[2].text = textD[2]
+			textInfo.exRuleTxt = textD[3]
+			buf={}
+		else
+			table.remove(buf,1)
+		end
+	end
 end
