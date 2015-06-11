@@ -37,6 +37,37 @@ hid_data=
 	end
 }
 
+
+function MOUSE()
+	local idleTime=0
+	local statu="ACTIVE"
+	local pos0={x=0,y=0}
+	local pos1={x=0,y=0}
+	function updatePos()
+		pos0={x = pos1.x, y = pos1.y}
+		pos1={x = love.mouse.getX(),
+		y = love.mouse.getY()}
+	end
+	function idleTimer(dt)
+		if(pos0.x == pos1.x and pos0.y == pos1.y and statu~="IDLE")then
+			idleTime = idleTime + dt
+			if idleTime > 3 then
+				statu = "IDLE"
+			end
+		else
+			if pos0.x ~= pos1.x or pos0.y ~= pos1.y  then
+				idleTime = 0
+				statu = "ACTIVE"
+			end
+		end
+	end
+	function getStatu()
+		return statu
+	end
+	return {updatePos=updatePos,idleTimer=idleTimer,getStatu=getStatu}
+end
+mouse=MOUSE()
+
 tween=require("tween")
 
 function sleep(sec)
@@ -166,6 +197,8 @@ function love.update(dt)
 	end
 	tween.update(dt)
 	rainDrop.update(dt)
+	mouse.updatePos()
+	mouse.idleTimer(dt)
 	love.timer.sleep(0.01)
 end
 
@@ -224,12 +257,11 @@ function love.draw(dt)
 		end
 		debugO1:write(str)
 	end
-	-- debugO1:output()
 
-	cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
-	cursor1:draw(cursorAngel)
-	love.graphics.setColor(255,255,255,circle.alpha)
-	love.graphics.circle("line", circle.x, circle.y, circle.r, 64)
+	if mouse.getStatu()=="ACTIVE" then
+		cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
+		cursor1:draw(cursorAngel)
+	end
 	rainDrop.draw()
 end
 
