@@ -1,18 +1,21 @@
 
 function love.conf(t)
+    -- io.stdout:setvbuf("no")
+    -- io.stdout=io.open("debug.log","w")
+    io.stdout:setvbuf("line")
     t.identity = ".\\"                   -- The name of the save directory (string)
     t.version = "0.9.2"                -- The LÖVE version this game was made for (string)
-    t.console = true          
+    -- t.console = true          
 
 	t.window.borderless=false
-	t.window.resizable=false
-	t.window.width=800
-	t.window.height=600
+	t.window.resizable=true
+	t.window.width=1300
+	t.window.height=300
  
-    t.window.title = "Test"        -- The window title (string)
+    t.window.title = "Chess960-APP"        -- The window title (string)
     t.window.icon = nil                -- Filepath to an image to use as the window's icon (string)
-    t.window.minwidth = 1              -- Minimum window width if the window is resizable (number)
-    t.window.minheight = 1             -- Minimum window height if the window is resizable (number)
+    t.window.minwidth = 100              -- Minimum window width if the window is resizable (number)
+    t.window.minheight = 100             -- Minimum window height if the window is resizable (number)
     t.window.fullscreen = true        -- Enable fullscreen (boolean)
     t.window.fullscreentype = "desktop" -- Standard fullscreen or desktop fullscreen mode (string)
     t.window.vsync = true              -- Enable vertical sync (boolean)

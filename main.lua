@@ -12,15 +12,16 @@ cursor=require("cursor")
 
 shaders=require("shaders")
 
-textInfo=require("textInfo")
+textInfo=require("textinfo")
 
 hid=require("hid")
 
 rainDrop=require("raindrop")
 alert=require("alert")
+menu=require("menu")
 
-hid.enum( 0x1130, 0x3132 )
-hid.open( 0x1130, 0x3132 )
+-- hid.enum( 0x1130, 0x3132 )
+-- hid.open( 0x1130, 0x3132 )
 hid.set_wbuf( { 0x00, 0x55, 0x53, 0x42, 0x43, 0xff, 0xff, 0xff, 0xf2 }, 9 )
 
 hid_data=
@@ -107,6 +108,8 @@ end
 -- 宽度预留10% we=3406
 -- 高度预留30% he=1368
 function love.load(arg)
+	hid_check()
+	-- sleep(0.5)
 	-- [[temp.t]]
 	textD={}
 	file={}
@@ -136,7 +139,7 @@ function love.load(arg)
 	CPS=0		-- 每秒通信次数
 	debugO1=debugU.new();
 	debugO1:setFont("consola.ttf",18)
-	textInfo.font=love.graphics.newFont("悦黑特细体.otf",90*gTrans.sx);
+	textInfo.font=love.graphics.newFont("yhtxt.otf",90*gTrans.sx);
 	hid_inv=0	-- 间隔上次hid操作的时间
 	usb_inv=0	-- 间隔上次usb成功通信的时间
 	usbc_inv=0	-- 上次usb成功通信的时间
@@ -149,21 +152,22 @@ function love.load(arg)
 	shaders.switch:send("height",10*gTrans.sy)
 	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+
+	bFullScreen=menu.icons:new("fullscreen.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(80,0)
+	bSetting=menu.icons:new("setting.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(150,0)
+	bExit=menu.icons:new("exit.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(220,0)
+	bFullScreen.func=function()
+		_,_,flags=love.window.getMode()
+		love.window.setMode(0,0,{fullscreen=not flags.fullscreen,resizable=true})
+		love.resize()
+	end
+	bSetting.func=function()
+		os.execute("sendManager.exe")
+	end
+	bExit.func=function()
+		love.event.quit()
+	end
 end
-
--- logfile=io.open("log.log", "w")
--- count=0
--- str="\n"
--- for k,v in ipairs(hid_data.buf) do
--- 	str=str..string.format("0x%02x", v)..","
--- 	if math.fmod(k,8)==0 then
--- 		str=str.."\n"
--- 	end
--- end
--- logfile:write(count.."={"..str.."}\n")
--- count=count+1
-
-circle = {x=0,y=0,r=100,alpha=0}
 
 function love.update(dt)
 	_dt=dt
@@ -300,12 +304,13 @@ function love.draw(dt)
 		debugO1:write(str)
 	end
 
+	rainDrop.draw()
 	alert.draw()
+	menu.draw()
 	if mouse.getStatu()=="ACTIVE" then
 		cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
 		cursor1:draw(cursorAngel)
 	end
-	rainDrop.draw()
 end
 
 function love.keypressed( key, isrepeat )
@@ -321,19 +326,30 @@ function love.keyreleased(key)
 
 end
 
+function love.mousemoved(x,y,dx,dy)
+	menu.onMouseMove(x,y)
+end
+
 function love.mousepressed( x,y,key )
 	if key=="l" then
 		rainDrop.newDrop(love.mouse.getX(),love.mouse.getY(),math.random(180,300))
+		menu.onMouseDown()
 	end
 end
 
 function love.mousereleased( x,y,key )
 	if key=="l" then
+		menu.onMouseRelease()
 	end
 end
 
 function love.resize(newWidth,newHeight)
-
+	gTrans=calc_gTrans()
+	textInfo.font=love.graphics.newFont("yhtxt.otf",90*gTrans.sx);
+	shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
+	shaders.switch:send("height",10*gTrans.sy)
+	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 end
 
 -- (0,0) x=(0,3066) y=(-165,802) w=3066 h=958
