@@ -17,6 +17,7 @@ textInfo=require("textInfo")
 hid=require("hid")
 
 rainDrop=require("raindrop")
+alert=require("alert")
 
 hid.enum( 0x1130, 0x3132 )
 hid.open( 0x1130, 0x3132 )
@@ -37,6 +38,30 @@ hid_data=
 	end
 }
 
+function hid_closure()
+	local statu = 0
+	local function hid_check()
+		local function getStatu()
+			if statu == 0 then
+				statu = hid.enum( 0x1130, 0x3132 )
+				if statu>0 then return "RECONNECT"
+				else return "DISCONNECT"
+				end
+			end
+			if statu == 1 then
+				statu = hid.enum( 0x1130, 0x3132 )
+				if statu>0 then return "CONNECT"
+				else return "LOSTCONNECT"
+				end
+			end
+		end
+		msg = getStatu()
+		if msg == "RECONNECT" then hid.open( 0x1130, 0x3132 ) end
+		return msg
+	end
+	return hid_check
+end
+hid_check = hid_closure()
 
 function MOUSE()
 	local idleTime=0
@@ -53,11 +78,15 @@ function MOUSE()
 			idleTime = idleTime + dt
 			if idleTime > 3 then
 				statu = "IDLE"
+				-- love.window.setMode(love.window.getWidth(),love.window.getHeight(),{borderless=true,resizable=false})
 			end
 		else
 			if pos0.x ~= pos1.x or pos0.y ~= pos1.y  then
 				idleTime = 0
-				statu = "ACTIVE"
+				if statu == "IDLE" then
+					statu = "ACTIVE"
+					-- love.window.setMode(love.window.getWidth(),love.window.getHeight(),{borderless=false,resizable=true})
+				end
 			end
 		end
 	end
@@ -144,19 +173,30 @@ function love.update(dt)
 	end
 	hid_inv=hid_inv+dt
 	usb_inv=usb_inv+dt
-	if(hid_inv>0.04)then
+	if(hid_inv>0.07)then
 		hid_inv=0
-		hid.write(9)
-		res=hid.read_timeout( 41,1 )
-		if(res>0)then
-			usbc_inv=usb_inv
-			usb_inv=0
-			hid_data.bufOld=hid.get_rbuf( 40 )
-			hid_data.sum=hid_data:Sum()
-			if(hid_data.sum==hid_data.sumOld)then
-				hid_data.buf=hid.get_rbuf( 40 )
+		hid_statu = hid_check()
+		if hid_statu == "RECONNECT" then
+			alert.msg("RECONNECT",alert.fadeOut)
+		end
+		if hid_statu == "LOSTCONNECT" then
+			alert.msg("CONNECTION LOST")
+		end
+		if hid_statu == "DISCONNECT" then
+		end
+		if hid_statu == "CONNECT" then
+			hid.write(9)
+			res=hid.read_timeout( 41,20 )
+			if(res>0)then
+				usbc_inv=usb_inv
+				usb_inv=0
+				hid_data.bufOld=hid.get_rbuf( 40 )
+				hid_data.sum=hid_data:Sum()
+				if(hid_data.sum==hid_data.sumOld)then
+					hid_data.buf=hid.get_rbuf( 40 )
+				end
+				hid_data.sumOld=hid_data.sum;
 			end
-			hid_data.sumOld=hid_data.sum;
 		end
 	end
 	tab=hid_data.buf
@@ -166,10 +206,10 @@ function love.update(dt)
 				if tid.target.r~=0.03 then
 					tween.stop(tid)
 					tid=nil
-					tid=tween(0.40, map.offset.switch, {r = 0.03}, "outElastic")
+					tid=tween(0.70, map.offset.switch, {r = 0.03}, "outElastic")
 				end
 			else
-				tid=tween(0.40, map.offset.switch, {r = 0.03}, "outElastic")
+				tid=tween(0.70, map.offset.switch, {r = 0.03}, "outElastic")
 			end
 		end
 		if(bit.band(tab[9],bit.lshift(1,6))>0 and bit.band(tab[9],bit.lshift(1,7))==0 and map.offset.switch.r~=-0.03)then	-- left key
@@ -177,10 +217,10 @@ function love.update(dt)
 				if tid.target.r~=-0.03 then
 					tween.stop(tid)
 					tid=nil
-					tid=tween(0.40, map.offset.switch, {r = -0.03}, "outElastic")
+					tid=tween(0.70, map.offset.switch, {r = -0.03}, "outElastic")
 				end
 			else
-				tid=tween(0.40, map.offset.switch, {r = -0.03}, "outElastic")
+				tid=tween(0.70, map.offset.switch, {r = -0.03}, "outElastic")
 			end
 		end
 		if(bit.band(tab[9],bit.lshift(1,6))==bit.band(tab[9],bit.lshift(1,7)) and map.offset.switch.r~=0)then	-- middle
@@ -188,17 +228,19 @@ function love.update(dt)
 				if tid.target.r~=0 then
 					tween.stop(tid)
 					tid=nil
-					tid=tween(0.50, map.offset.switch, {r = 0}, "outBack")
+					tid=tween(0.90, map.offset.switch, {r = 0}, "outBack")
 				end
 			else
-				tid=tween(0.50, map.offset.switch, {r = 0}, "outBack")
+				tid=tween(0.90, map.offset.switch, {r = 0}, "outBack")
 			end
 		end
 	end
 	tween.update(dt)
 	rainDrop.update(dt)
+	alert.update(dt)
 	mouse.updatePos()
 	mouse.idleTimer(dt)
+	menu.update(dt)
 	love.timer.sleep(0.01)
 end
 
@@ -258,6 +300,7 @@ function love.draw(dt)
 		debugO1:write(str)
 	end
 
+	alert.draw()
 	if mouse.getStatu()=="ACTIVE" then
 		cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
 		cursor1:draw(cursorAngel)
@@ -315,6 +358,7 @@ end
 buf={}
 function love.textinput(t)
 	table.insert(buf,t)
+	-- alert.msg(table.concat(buf))
 	if(#buf>=7)then
 		if(buf.valid==true or string.find(table.concat(buf), "6173420",1,true))then
 			buf.valid = true
