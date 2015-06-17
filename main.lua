@@ -10,7 +10,6 @@ usb=require("usbParse")
 disp=require("display")
 cursor=require("cursor")
 
-shaders=require("shaders")
 
 textInfo=require("textinfo")
 
@@ -108,6 +107,11 @@ end
 -- 宽度预留10% we=3406
 -- 高度预留30% he=1368
 function love.load(arg)
+	isShaderSupport = love.graphics.isSupported("shader")
+	-- isShaderSupport = false
+	if isShaderSupport then
+		shaders=require("shaders")
+	end
 	hid_check()
 	-- sleep(0.5)
 	-- [[temp.t]]
@@ -148,8 +152,10 @@ function love.load(arg)
 	cursor1:setOffset(20,20)
 	cursorAngel=0
 
-	shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
-	shaders.switch:send("height",10*gTrans.sy)
+	if isShaderSupport then
+		shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
+		shaders.switch:send("height",10*gTrans.sy)
+	end
 	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 
@@ -256,36 +262,67 @@ function love.draw(dt)
 	render_buffer2:clear()
 	debugO1:clr()
 	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
-	love.graphics.push()
-		love.graphics.translate(gTrans.ox, gTrans.oy)
-		love.graphics.scale(gTrans.sx, gTrans.sy)
+	if isShaderSupport then
 		love.graphics.setShader(shaders.color)
-		disp.drawBack()
-		love.graphics.setShader()
-	love.graphics.pop()
+	else
+		love.graphics.setColor(102,179,255,255)
+	end
+
+
 	love.graphics.setCanvas(render_buffer2)
-
-
 	love.graphics.push()
 		love.graphics.translate(gTrans.ox, gTrans.oy)
 		love.graphics.scale(gTrans.sx, gTrans.sy)
-		love.graphics.setShader(shaders.switch)
+		if isShaderSupport then
+			love.graphics.setShader(shaders.switch)
+		end
 		disp.drawSwitch(hid_data.buf)
-	love.graphics.pop()
-
-	love.graphics.setCanvas(render_buffer)
-	love.graphics.setShader(shaders.color)
-	love.graphics.draw(render_buffer2)
-
-	love.graphics.push()
-		love.graphics.translate(gTrans.ox, gTrans.oy)
-		love.graphics.scale(gTrans.sx, gTrans.sy)
-		disp.drawClockUI(hid_data.buf)
-		love.graphics.setShader()
+		if not isShaderSupport then
+			disp.drawSwitchMask(hid_data.buf)
+		end
 		love.graphics.setCanvas()
 	love.graphics.pop()
 
+	if isShaderSupport then
+		love.graphics.setShader(shaders.color)
+	else
+		love.graphics.setColor(102,179,255,255)
+	end
+	love.graphics.draw(render_buffer2)
+
+	love.graphics.setCanvas(render_buffer)
+	love.graphics.push()
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
+		if isShaderSupport then
+			love.graphics.setShader(shaders.color)
+		else
+			love.graphics.setColor(102,179,255,255)
+		end
+		disp.drawBack()
+		if isShaderSupport then
+			love.graphics.setShader()
+		end
+	love.graphics.pop()
+	love.graphics.setCanvas()
 	love.graphics.draw(render_buffer)
+
+	love.graphics.push()
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
+		if isShaderSupport then
+			love.graphics.setShader(shaders.color)
+		else
+			love.graphics.setColor(102,179,255,255)
+		end
+		disp.drawClockUI(hid_data.buf)
+		if isShaderSupport then
+			love.graphics.setShader()
+		else
+			love.graphics.setColor(255,255,255,255)
+		end
+	love.graphics.pop()
+
 
 	textInfo.showRule(hid_data.buf[40])
 	textInfo.showName()
@@ -347,8 +384,10 @@ function love.resize(newWidth,newHeight)
 	gTrans=calc_gTrans()
 	-- textInfo.font=love.graphics.newFont("yhtxt.otf",90*gTrans.sx);
 	textInfo.font=love.graphics.newFont("Deng.ttf",90*gTrans.sx);
-	shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
-	shaders.switch:send("height",10*gTrans.sy)
+	if isShaderSupport then
+		shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
+		shaders.switch:send("height",10*gTrans.sy)
+	end
 	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 end
