@@ -139,7 +139,7 @@ function love.load(arg)
 	CPS=0		-- 每秒通信次数
 	debugO1=debugU.new();
 	debugO1:setFont("consola.ttf",18)
-	textInfo.font=love.graphics.newFont("yhtxt.otf",90*gTrans.sx);
+	textInfo.font=love.graphics.newFont("consola.ttf",90*gTrans.sx);
 	hid_inv=0	-- 间隔上次hid操作的时间
 	usb_inv=0	-- 间隔上次usb成功通信的时间
 	usbc_inv=0	-- 上次usb成功通信的时间
@@ -345,7 +345,8 @@ end
 
 function love.resize(newWidth,newHeight)
 	gTrans=calc_gTrans()
-	textInfo.font=love.graphics.newFont("yhtxt.otf",90*gTrans.sx);
+	-- textInfo.font=love.graphics.newFont("yhtxt.otf",90*gTrans.sx);
+	textInfo.font=love.graphics.newFont("Deng.ttf",90*gTrans.sx);
 	shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
 	shaders.switch:send("height",10*gTrans.sy)
 	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())

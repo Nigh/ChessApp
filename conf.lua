@@ -13,9 +13,9 @@ function love.conf(t)
 	t.window.height=300
  
     t.window.title = "Chess960-APP"        -- The window title (string)
-    t.window.icon = nil                -- Filepath to an image to use as the window's icon (string)
-    t.window.minwidth = 100              -- Minimum window width if the window is resizable (number)
-    t.window.minheight = 100             -- Minimum window height if the window is resizable (number)
+    t.window.icon = "960title.png"                -- Filepath to an image to use as the window's icon (string)
+    t.window.minwidth = 200              -- Minimum window width if the window is resizable (number)
+    t.window.minheight = 200             -- Minimum window height if the window is resizable (number)
     t.window.fullscreen = true        -- Enable fullscreen (boolean)
     t.window.fullscreentype = "desktop" -- Standard fullscreen or desktop fullscreen mode (string)
     t.window.vsync = true              -- Enable vertical sync (boolean)
