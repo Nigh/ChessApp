@@ -85,6 +85,6 @@ function drawSwitchMask(tab)
 		return
 	end
 	love.graphics.setColor(0,0,0,255);
-	love.graphics.rectangle("fill",0,-10,bitmap.pBswitch:getWidth(),130)
+	love.graphics.rectangle("fill",0,-10,bitmap.pBswitch:getWidth(),150)
 	-- love.graphics.draw(bitmap.pBswitch,map.offset.switch.x, map.offset.switch.y,map.offset.switch.r,1,1,map.offset.switch.ox,map.offset.switch.oy);
 end

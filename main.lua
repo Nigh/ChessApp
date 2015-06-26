@@ -108,11 +108,22 @@ end
 -- 高度预留30% he=1368
 function love.load(arg)
 	isShaderSupport = love.graphics.isSupported("shader")
+	isCanvasSupport = love.graphics.isSupported("canvas")
 	-- isShaderSupport = false
+	-- isCanvasSupport = false
+	if isCanvasSupport==true then
+	    drawFunc=drawF1
+	else
+		drawFunc=drawF2	-- 低端适配
+	end
 	if isShaderSupport then
 		shaders=require("shaders")
 	end
-	hid_check()
+	if hid_check()=="RECONNECT" then
+		-- hid.open( 0x1130, 0x3132 )
+		hid.write(10);
+		hid.read_timeout(65,1000)
+	end
 	-- sleep(0.5)
 	-- [[temp.t]]
 	textD={}
@@ -156,8 +167,10 @@ function love.load(arg)
 		shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
 		shaders.switch:send("height",10*gTrans.sy)
 	end
-	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
-	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+	if isCanvasSupport then
+		render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+		render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+	end
 
 	bFullScreen=menu.icons:new("fullscreen.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(80,0)
 	bSetting=menu.icons:new("setting.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(150,0)
@@ -174,7 +187,7 @@ function love.load(arg)
 		love.event.quit()
 	end
 end
-
+limit = 1
 function love.update(dt)
 	_dt=dt
 	FPS=0.96*FPS+0.04*1/dt
@@ -183,7 +196,8 @@ function love.update(dt)
 	end
 	hid_inv=hid_inv+dt
 	usb_inv=usb_inv+dt
-	if(hid_inv>0.07)then
+	if(hid_inv>limit)then
+		limit = 0.07
 		hid_inv=0
 		hid_statu = hid_check()
 		if hid_statu == "RECONNECT" then
@@ -195,7 +209,8 @@ function love.update(dt)
 		if hid_statu == "DISCONNECT" then
 		end
 		if hid_statu == "CONNECT" then
-			hid.write(9)
+			-- hid.write(9)
+			hid.write(10)
 			res=hid.read_timeout( 41,20 )
 			if(res>0)then
 				usbc_inv=usb_inv
@@ -254,21 +269,16 @@ function love.update(dt)
 	love.timer.sleep(0.01)
 end
 
-
-
-function love.draw(dt)
-	love.graphics.setColor(255,255,255,255)
-	render_buffer:clear()
-	render_buffer2:clear()
-	debugO1:clr()
-	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
+drawF1=function()
+	if isCanvasSupport then
+		render_buffer:clear()
+		render_buffer2:clear()
+	end
 	if isShaderSupport then
 		love.graphics.setShader(shaders.color)
 	else
 		love.graphics.setColor(102,179,255,255)
 	end
-
-
 	love.graphics.setCanvas(render_buffer2)
 	love.graphics.push()
 		love.graphics.translate(gTrans.ox, gTrans.oy)
@@ -322,7 +332,40 @@ function love.draw(dt)
 			love.graphics.setColor(255,255,255,255)
 		end
 	love.graphics.pop()
+end
 
+drawF2=function()
+	love.graphics.setColor(102,179,255,255)
+	love.graphics.push()
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
+		disp.drawSwitch(hid_data.buf)
+		if not isShaderSupport then
+			disp.drawSwitchMask(hid_data.buf)
+		end
+	love.graphics.pop()
+	love.graphics.setColor(102,179,255,255)
+	love.graphics.push()
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
+		love.graphics.setColor(102,179,255,255)
+		disp.drawBack()
+	love.graphics.pop()
+
+	love.graphics.push()
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
+		love.graphics.setColor(102,179,255,255)
+		disp.drawClockUI(hid_data.buf)
+		love.graphics.setColor(255,255,255,255)
+	love.graphics.pop()
+end
+
+function love.draw(dt)
+	love.graphics.setColor(255,255,255,255)
+	debugO1:clr()
+	-- love.graphics.draw(bitmap.pBwhite, 100, 100)
+	drawFunc()
 
 	textInfo.showRule(hid_data.buf[40])
 	textInfo.showName()
@@ -388,8 +431,10 @@ function love.resize(newWidth,newHeight)
 		shaders.switch:send("y",love.window.getHeight()-(gTrans.oy-10*gTrans.sy))
 		shaders.switch:send("height",10*gTrans.sy)
 	end
-	render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
-	render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+	if isCanvasSupport then
+		render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+		render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+	end
 end
 
 -- (0,0) x=(0,3066) y=(-165,802) w=3066 h=958

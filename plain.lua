@@ -24,10 +24,9 @@ while 1 do
 		res=lib.hid_read_timeout(41,50)
 		if(res>0)then
 			tab = lib.get_readBuf(40)
-			-- for k,v in ipairs(tab) do
-			-- 	print(k..":"..v)
-			-- end
-			-- break
+			for k,v in ipairs(tab) do
+				print(k..":"..v)
+			end
 		else
 			if lib.enumerate(0x1130,0x3132)>0 then
 				lib.hid_write(9);
@@ -37,9 +36,9 @@ while 1 do
 			end
 		end
 		idx=idx+1
-		-- if(idx>50)then
-		-- 	break
-		-- end
+		if(idx>50)then
+			break
+		end
 		print(idx)
 	end
 end

@@ -9,22 +9,22 @@ function love.conf(t)
 
 	t.window.borderless=false
 	t.window.resizable=true
-	t.window.width=1300
-	t.window.height=300
+	t.window.width=0
+	t.window.height=0
  
     t.window.title = "Chess960-APP"        -- The window title (string)
     t.window.icon = "960title.png"                -- Filepath to an image to use as the window's icon (string)
     t.window.minwidth = 200              -- Minimum window width if the window is resizable (number)
     t.window.minheight = 200             -- Minimum window height if the window is resizable (number)
-    t.window.fullscreen = true        -- Enable fullscreen (boolean)
+    t.window.fullscreen = false        -- Enable fullscreen (boolean)
     t.window.fullscreentype = "desktop" -- Standard fullscreen or desktop fullscreen mode (string)
     t.window.vsync = true              -- Enable vertical sync (boolean)
     t.window.fsaa = 2                  -- The number of samples to use with multi-sampled antialiasing (number)
     t.window.display = 1               -- Index of the monitor to show the window in (number)
     t.window.highdpi = false           -- Enable high-dpi mode for the window on a Retina display (boolean)
     t.window.srgb = false              -- Enable sRGB gamma correction when drawing to the screen (boolean)
-    t.window.x = nil                   -- The x-coordinate of the window's position in the specified display (number)
-    t.window.y = nil                   -- The y-coordinate of the window's position in the specified display (number)
+    t.window.x = 0                   -- The x-coordinate of the window's position in the specified display (number)
+    t.window.y = 40                   -- The y-coordinate of the window's position in the specified display (number)
  
     t.modules.audio = false             -- Enable the audio module (boolean)
     t.modules.event = true             -- Enable the event module (boolean)
