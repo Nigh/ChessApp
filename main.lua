@@ -107,6 +107,8 @@ end
 -- 宽度预留10% we=3406
 -- 高度预留30% he=1368
 function love.load(arg)
+	backgroundColor = { 0x09, 0x07, 0x0a }
+	love.graphics.setBackgroundColor( backgroundColor )
 	isShaderSupport = love.graphics.isSupported("shader")
 	isCanvasSupport = love.graphics.isSupported("canvas")
 	-- isShaderSupport = false
@@ -171,10 +173,9 @@ function love.load(arg)
 		render_buffer = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 		render_buffer2 = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 	end
-
-	bFullScreen=menu.icons:new("fullscreen.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(80,0)
-	bSetting=menu.icons:new("setting.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(150,0)
-	bExit=menu.icons:new("exit.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(220,0)
+	bFullScreen=menu.icons:new("fullscreen.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(10,0)
+	bSetting=menu.icons:new("setting.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(70,0)
+	bExit=menu.icons:new("exit.png",{normal={255,255,255,245},hover={200,200,220,245},pressed={255,70,80,245}}):setPos(130,0)
 	bFullScreen.func=function()
 		_,_,flags=love.window.getMode()
 		love.window.setMode(0,0,{fullscreen=not flags.fullscreen,resizable=true})
@@ -186,6 +187,7 @@ function love.load(arg)
 	bExit.func=function()
 		love.event.quit()
 	end
+	bFullScreen.func()
 end
 limit = 1
 function love.update(dt)

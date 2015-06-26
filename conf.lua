@@ -12,7 +12,7 @@ function love.conf(t)
 	t.window.width=0
 	t.window.height=0
  
-    t.window.title = "Chess960-APP"        -- The window title (string)
+    t.window.title = "960"            -- The window title (string)
     t.window.icon = "960title.png"                -- Filepath to an image to use as the window's icon (string)
     t.window.minwidth = 200              -- Minimum window width if the window is resizable (number)
     t.window.minheight = 200             -- Minimum window height if the window is resizable (number)
