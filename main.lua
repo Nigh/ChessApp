@@ -130,7 +130,13 @@ function love.load(arg)
 	-- [[temp.t]]
 	textD={}
 	file={}
+
 	for i=1,3 do
+		if i<3 then
+			file[i]=io.open("temp"..i..".t","w")
+			file[i]:write("No. 0"..i)
+			file[i]:close()
+		end
 		file[i]=io.open("temp"..i..".t","r")
 		if(file[i]==nil)then
 			textD[i] = nil
@@ -190,44 +196,8 @@ function love.load(arg)
 	bFullScreen.func()
 end
 
-switch_angle=0.045
-limit = 1
-function love.update(dt)
-	_dt=dt
-	FPS=0.96*FPS+0.04*1/dt
-	if usbc_inv>0 then
-		CPS=0.9*CPS+0.1/usbc_inv
-	end
-	hid_inv=hid_inv+dt
-	usb_inv=usb_inv+dt
-	if(hid_inv>limit)then
-		limit = 0.07
-		hid_inv=0
-		hid_statu = hid_check()
-		if hid_statu == "RECONNECT" then
-			alert.msg("RECONNECT",alert.fadeOut)
-		end
-		if hid_statu == "LOSTCONNECT" then
-			alert.msg("CONNECTION LOST")
-		end
-		if hid_statu == "DISCONNECT" then
-		end
-		if hid_statu == "CONNECT" then
-			-- hid.write(9)
-			hid.write(10)
-			res=hid.read_timeout( 41,20 )
-			if(res>0)then
-				usbc_inv=usb_inv
-				usb_inv=0
-				hid_data.bufOld=hid.get_rbuf( 40 )
-				hid_data.sum=hid_data:Sum()
-				if(hid_data.sum==hid_data.sumOld)then
-					hid_data.buf=hid.get_rbuf( 40 )
-				end
-				hid_data.sumOld=hid_data.sum;
-			end
-		end
-	end
+local switch = switch or {}
+function switch.update(dt)
 	tab=hid_data.buf
 	if tab[9] then
 		if(bit.band(tab[9],bit.lshift(1,7))>0 and bit.band(tab[9],bit.lshift(1,6))==0 and map.offset.switch.r~=0.03)then	-- right key
@@ -264,6 +234,107 @@ function love.update(dt)
 			end
 		end
 	end
+end
+-- function switch.update(dt)
+-- 	tab=hid_data.buf
+-- 	if tab[9] then
+-- 		if(bit.band(tab[9],bit.lshift(1,7))>0 and bit.band(tab[9],bit.lshift(1,6))==0 and map.offset.switch.r~=0.03)then	-- right key
+-- 			if tid then
+-- 				if tid.target.r~=switch_angle then
+-- 					tween.stop(tid)
+-- 					tid=nil
+-- 					tid=tween(0.70, map.offset.switch, {r = switch_angle}, "outElastic")
+-- 				end
+-- 			else
+-- 				tid=tween(0.70, map.offset.switch, {r = switch_angle}, "outElastic")
+-- 			end
+-- 		end
+-- 		if(bit.band(tab[9],bit.lshift(1,6))>0 and bit.band(tab[9],bit.lshift(1,7))==0 and map.offset.switch.r~=-0.03)then	-- left key
+-- 			if tid then
+-- 				if tid.target.r~=-switch_angle then
+-- 					tween.stop(tid)
+-- 					tid=nil
+-- 					tid=tween(0.70, map.offset.switch, {r = -switch_angle}, "outElastic")
+-- 				end
+-- 			else
+-- 				tid=tween(0.70, map.offset.switch, {r = -switch_angle}, "outElastic")
+-- 			end
+-- 		end
+-- 		if(bit.band(tab[9],bit.lshift(1,6))==bit.band(tab[9],bit.lshift(1,7)) and map.offset.switch.r~=0)then	-- middle
+-- 			if tid then
+-- 				if tid.target.r~=0 then
+-- 					tween.stop(tid)
+-- 					tid=nil
+-- 					tid=tween(0.90, map.offset.switch, {r = 0}, "outBack")
+-- 				end
+-- 			else
+-- 				tid=tween(0.90, map.offset.switch, {r = 0}, "outBack")
+-- 			end
+-- 		end
+-- 	end
+-- end
+local led = led or {}
+function led.draw()
+	tab=hid_data.buf
+	if tab[9] then
+		love.graphics.push()
+		love.graphics.translate(gTrans.ox, gTrans.oy)
+		love.graphics.scale(gTrans.sx, gTrans.sy)
+		love.graphics.setColor(255,244,10,250)
+		if bit.band(tab[9],bit.lshift(1,4))>0 then	-- left led
+			love.graphics.draw(bitmap.pBled_on,0,-500)
+		else
+			love.graphics.draw(bitmap.pBled_off,0,-500)
+		end
+		
+		if bit.band(tab[9],bit.lshift(1,5))>0 then	-- right right
+			love.graphics.draw(bitmap.pBled_on,1636,-500)
+		else
+			love.graphics.draw(bitmap.pBled_off,1636,-500)
+		end
+		love.graphics.pop()
+	end
+end
+
+switch_angle=0.045
+limit = 1
+function love.update(dt)
+	_dt=dt
+	FPS=0.96*FPS+0.04*1/dt
+	if usbc_inv>0 then
+		CPS=0.9*CPS+0.1/usbc_inv
+	end
+	hid_inv=hid_inv+dt
+	usb_inv=usb_inv+dt
+	if(hid_inv>limit)then
+		limit = 0.06
+		hid_inv=0
+		hid_statu = hid_check()
+		if hid_statu == "RECONNECT" then
+			alert.msg("RECONNECT",alert.fadeOut)
+		end
+		if hid_statu == "LOSTCONNECT" then
+			alert.msg("CONNECTION LOST")
+		end
+		if hid_statu == "DISCONNECT" then
+		end
+		if hid_statu == "CONNECT" then
+			-- hid.write(9)
+			hid.write(10)
+			res=hid.read_timeout( 41,20 )
+			if(res>0)then
+				usbc_inv=usb_inv
+				usb_inv=0
+				hid_data.bufOld=hid.get_rbuf( 40 )
+				hid_data.sum=hid_data:Sum()
+				if(hid_data.sum==hid_data.sumOld)then
+					hid_data.buf=hid.get_rbuf( 40 )
+				end
+				hid_data.sumOld=hid_data.sum;
+			end
+		end
+	end
+	switch.update(dt)
 	tween.update(dt)
 	rainDrop.update(dt)
 	alert.update(dt)
@@ -389,8 +460,10 @@ function love.draw(dt)
 	end
 
 	rainDrop.draw()
+	led.draw()
 	alert.draw()
 	menu.draw()
+	-- debugO1:output()
 	if mouse.getStatu()=="ACTIVE" then
 		cursorAngel=cursorAngel-1>0 and cursorAngel-1 or 360
 		cursor1:draw(cursorAngel)
@@ -474,11 +547,6 @@ function love.textinput(t)
 				else
 					textD[i] = file[i]:read()
 					file[i]:close()
-					if i<3 then
-						file[i]=io.open("temp"..i..".t","w")
-						file[i]:write("No. 0"..i)
-						file[i]:close()
-					end
 				end
 				if(textD[i] == nil)then
 					textD[i] = ""

@@ -21,8 +21,8 @@ for i=1,31 do
 	end
 end
 
-bits[1][0].image=nil
-bits[1][1].image=nil
+bits[1][0].image=nil	-- left led
+bits[1][1].image=nil	-- right led
 bits[1][2].image=nil
 bits[1][3].image=nil
 bits[1][4].image=nil

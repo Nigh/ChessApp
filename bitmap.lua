@@ -33,8 +33,8 @@ pBchess_bottom=newImage(rootPath.."chess-bottom.png")
 
 -- pBk_up=newImage(rootPath.."button_up.png")
 -- pBk_down=newImage(rootPath.."button_down.png")
--- pBled_on=newImage(rootPath.."light_on2.png")
--- pBled_off=newImage(rootPath.."light_off2.png")
+pBled_on=newImage(rootPath.."light_on.png")
+pBled_off=newImage(rootPath.."light_off.png")
 
 
 -- pBleftb=newImage(rootPath.."leftb.png")
