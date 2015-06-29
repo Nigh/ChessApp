@@ -189,6 +189,8 @@ function love.load(arg)
 	end
 	bFullScreen.func()
 end
+
+switch_angle=0.045
 limit = 1
 function love.update(dt)
 	_dt=dt
@@ -230,24 +232,24 @@ function love.update(dt)
 	if tab[9] then
 		if(bit.band(tab[9],bit.lshift(1,7))>0 and bit.band(tab[9],bit.lshift(1,6))==0 and map.offset.switch.r~=0.03)then	-- right key
 			if tid then
-				if tid.target.r~=0.03 then
+				if tid.target.r~=switch_angle then
 					tween.stop(tid)
 					tid=nil
-					tid=tween(0.70, map.offset.switch, {r = 0.03}, "outElastic")
+					tid=tween(0.70, map.offset.switch, {r = switch_angle}, "outElastic")
 				end
 			else
-				tid=tween(0.70, map.offset.switch, {r = 0.03}, "outElastic")
+				tid=tween(0.70, map.offset.switch, {r = switch_angle}, "outElastic")
 			end
 		end
 		if(bit.band(tab[9],bit.lshift(1,6))>0 and bit.band(tab[9],bit.lshift(1,7))==0 and map.offset.switch.r~=-0.03)then	-- left key
 			if tid then
-				if tid.target.r~=-0.03 then
+				if tid.target.r~=-switch_angle then
 					tween.stop(tid)
 					tid=nil
-					tid=tween(0.70, map.offset.switch, {r = -0.03}, "outElastic")
+					tid=tween(0.70, map.offset.switch, {r = -switch_angle}, "outElastic")
 				end
 			else
-				tid=tween(0.70, map.offset.switch, {r = -0.03}, "outElastic")
+				tid=tween(0.70, map.offset.switch, {r = -switch_angle}, "outElastic")
 			end
 		end
 		if(bit.band(tab[9],bit.lshift(1,6))==bit.band(tab[9],bit.lshift(1,7)) and map.offset.switch.r~=0)then	-- middle
