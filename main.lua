@@ -474,6 +474,11 @@ function love.textinput(t)
 				else
 					textD[i] = file[i]:read()
 					file[i]:close()
+					if i<3 then
+						file[i]=io.open("temp"..i..".t","w")
+						file[i]:write("No. 0"..i)
+						file[i]:close()
+					end
 				end
 				if(textD[i] == nil)then
 					textD[i] = ""
